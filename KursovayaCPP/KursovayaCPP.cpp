@@ -119,7 +119,6 @@ void TryParseDate(string str, int& out)
     TryParse(time.substr(time.find_first_of(':') + 1, time.find_last_of(':') - time.find_first_of(':') - 1), minutes);
     TryParse(time.substr(time.find_last_of(':') + 1, time.length() - time.find_last_of(':') - 1), seconds);
 
-    //out = (((((years - 1970) * 365) + ((months - 1) * 31) + (days - 1)) * 24 + (hours == 0 ? hours : hours - 1)) * 60 + (minutes == 0 ? minutes : minutes - 1)) * 60 + seconds;
     out = (((((years - 1970) * 365) + ((months - 1) * 31) + (days - 1)) * 24 + hours) * 60 + minutes) * 60 + seconds;
 }
 
