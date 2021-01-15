@@ -144,17 +144,6 @@
   <ItemGroup>
     <ClCompile Include="KursovayaCPP.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Account.h" />
-    <ClInclude Include="AccountService.h" />
-    <ClInclude Include="ContributionCategoryType.h" />
-    <ClInclude Include="FileService.h" />
-    <ClInclude Include="IOService.h" />
-    <ClInclude Include="List.h" />
-    <ClInclude Include="Passport.h" />
-    <ClInclude Include="Transaction.h" />
-    <ClInclude Include="TransactionType.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
