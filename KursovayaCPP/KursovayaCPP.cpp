@@ -15,29 +15,21 @@ static constexpr int AmountSecondPerDay = 86400; // 24 hours
 static constexpr int AmountSecondPerHour = 3600; // 60 minuts
 static constexpr int AmountSecondPerMinute = 60; // 60 seconds
 
-enum struct TransactionType
+struct Account
 {
-    Enrollment,
-    Withdraw
+    int number;
+    string fio;
+    string numberAndSeries;
+    string contributionType;
+    int dateTimestampLastTransaction;
+    int amount;
+
+    struct Account* next;
 };
 
-struct TransactionTypeHelper
-{
-public:
-    static std::string EnumToString(TransactionType type)
-    {
-        switch (type)
-        {
-        case TransactionType::Enrollment:
-            return "Enrollment";
-            break;
-        case TransactionType::Withdraw:
-            return "Withdraw";
-            break;
-        }
-        return "";
-    }
-};
+typedef struct Account AccountList;
+AccountList* headList = nullptr;
+AccountList* endList = nullptr;
 
 string GetDateString(int dateTimestamp)
 {
@@ -64,29 +56,15 @@ string GetDateString(int dateTimestamp)
     return res;
 }
 
-struct Account
+void CopyArrays(AccountList* fromList, AccountList* inList)
 {
-    int number;
-    string fio;
-    string numberAndSeries;
-    string contributionType;
-    int dateTimestampLastTransaction;
-    int amount;
-
-    struct Account* next;
-};
-
-struct SubAccount
-{
-    struct Account* value;
-    struct SubAccount* next;
-};
-
-typedef struct Account AccountList;
-AccountList* headList = nullptr;
-AccountList* endList = nullptr;
-
-typedef struct SubAccount SubAccountList;
+    inList->number = fromList->number;
+    inList->fio = fromList->fio;
+    inList->numberAndSeries = fromList->numberAndSeries;
+    inList->contributionType = fromList->contributionType;
+    inList->dateTimestampLastTransaction = fromList->dateTimestampLastTransaction;
+    inList->amount = fromList->amount;
+}
 
 bool TryParse(string str, int& out)
 {
@@ -97,7 +75,7 @@ bool TryParse(string str, int& out)
         out = resNum;
         res = true;
     }
-    catch (const std::exception&)
+    catch (const exception&)
     {
         res = false;
     }
@@ -267,13 +245,14 @@ void WriteList()
     }
 }
 
-SubAccountList* SubListCreate()
+AccountList* SubListCreate()
 {
     AccountList* currentList = headList;
-    SubAccountList* sub = new SubAccountList;
-    SubAccountList* subHead = new SubAccountList;
+    AccountList* subList = new AccountList;
+    AccountList* headSubList = subList;
+
     bool first = true;
-    int currentTimestamp = std::time(0);
+    int currentTimestamp = time(0);
 
     while (currentList)
     {
@@ -282,16 +261,15 @@ SubAccountList* SubListCreate()
             if (first)
             {
                 first = false;
-                subHead->value = currentList;
-                sub = subHead;
-                sub->next = nullptr;
+                CopyArrays(currentList, subList);
+                subList->next = nullptr;
             }
             else
             {
-                sub->next = new SubAccountList;
-                sub = sub->next;
-                sub->value = currentList;
-                sub->next = nullptr;
+                subList->next = new AccountList();
+                subList = subList->next;
+                CopyArrays(currentList, subList);
+                subList->next = nullptr;
             }
         }
         currentList = currentList->next;
@@ -303,7 +281,7 @@ SubAccountList* SubListCreate()
     }
     else
     {
-        return subHead;
+        return headSubList;
     }
 }
 
@@ -315,10 +293,10 @@ void WriteListOfLastYear()
         return;
     }
 
-    SubAccountList* sub = SubListCreate();
-    SubAccountList* subHead = sub;
+    AccountList* subList = SubListCreate();
+    AccountList* subHead = subList;
 
-    if (!sub)
+    if (!subList)
     {
         cout << "За последний год не было операций ни на одном аккаунте" << endl;
         return;
@@ -326,23 +304,22 @@ void WriteListOfLastYear()
 
     AccountList* elem;
 
-    while (sub)
+    while (subList)
     {
-        elem = sub->value;
-        cout << "Номер аккаунта: "; cout << elem->number << endl;
-        cout << "ФИО: "; cout << elem->fio << endl;
-        cout << "Номер и серия паспорта: "; cout << elem->numberAndSeries << endl;
-        cout << "Тип вклада: "; cout << elem->contributionType << endl;
-        cout << "Дата последней операции: "; cout << GetDateString(elem->dateTimestampLastTransaction) << endl;
-        cout << "Текущая сумма вклада: "; cout << elem->amount << endl;
+        cout << "Номер аккаунта: "; cout << subList->number << endl;
+        cout << "ФИО: "; cout << subList->fio << endl;
+        cout << "Номер и серия паспорта: "; cout << subList->numberAndSeries << endl;
+        cout << "Тип вклада: "; cout << subList->contributionType << endl;
+        cout << "Дата последней операции: "; cout << GetDateString(subList->dateTimestampLastTransaction) << endl;
+        cout << "Текущая сумма вклада: "; cout << subList->amount << endl;
         cout << "----------------------------" << endl;
 
-        sub = sub->next;
+        subList = subList->next;
     }
 
     while (subHead)
     {
-        SubAccountList* currentList = subHead;
+        AccountList* currentList = subHead;
         subHead = currentList->next;
         delete currentList;
     }
