@@ -85,19 +85,21 @@ bool TryParse(string str, int& out)
 
 void TryParseDate(string str, int& out)
 {
-    int years, months, days, hours, minutes, seconds;
+    int years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0;
     std::string date = str.substr(0, str.find_first_of('-'));
     std::string time = str.substr(str.find_first_of('-') + 1, str.length() - str.find_first_of('-') - 1);
 
-    TryParse(date.substr(0, date.find_first_of('/')), days);
-    TryParse(date.substr(date.find_first_of('/') + 1, date.find_last_of('/') - date.find_first_of('/') - 1), months);
-    TryParse(date.substr(date.find_last_of('/') + 1, date.length() - date.find_last_of('/') - 1), years);
+    if (!TryParse(date.substr(0, date.find_first_of('/')), days)) { out = 0; return; }
+    if (!TryParse(date.substr(date.find_first_of('/') + 1, date.find_last_of('/') - date.find_first_of('/') - 1), months)) { out = 0; return; }
+    if (!TryParse(date.substr(date.find_last_of('/') + 1, date.length() - date.find_last_of('/') - 1), years)) { out = 0; return; }
 
-    TryParse(time.substr(0, time.find_first_of(':')), hours);
-    TryParse(time.substr(time.find_first_of(':') + 1, time.find_last_of(':') - time.find_first_of(':') - 1), minutes);
-    TryParse(time.substr(time.find_last_of(':') + 1, time.length() - time.find_last_of(':') - 1), seconds);
+    if (!TryParse(time.substr(0, time.find_first_of(':')), hours)) { out = 0; return; }
+    if (!TryParse(time.substr(time.find_first_of(':') + 1, time.find_last_of(':') - time.find_first_of(':') - 1), minutes)) { out = 0; return; }
+    if (!TryParse(time.substr(time.find_last_of(':') + 1, time.length() - time.find_last_of(':') - 1), seconds)) { out = 0; return; }
 
-    out = (((((years - 1970) * 365) + ((months - 1) * 31) + (days - 1)) * 24 + hours) * 60 + minutes) * 60 + seconds;
+    int res = (((((years - 1970) * 365) + ((months - 1) * 31) + (days - 1)) * 24 + hours) * 60 + minutes) * 60 + seconds;
+    
+    out = res > 0 ? res : 0;
 }
 
 void Add()
@@ -195,31 +197,30 @@ void Search()
             currentList = currentList->next;
         }
     }
-    else
-        if (searchBy == 2)
+    else if (searchBy == 2)
+    {
+        cout << "Введите ФИО (Иванов И.И.): ";
+        getline(cin, tempStr);
+        while (currentList)
         {
-            cout << "Введите ФИО (Иванов И.И.): ";
-            getline(cin, tempStr);
-            while (currentList)
+            if (currentList->fio == tempStr)
             {
-                if (currentList->fio == tempStr)
-                {
-                    cout << "Номер аккаунта: "; cout << currentList->number << endl;
-                    cout << "ФИО: "; cout << currentList->fio << endl;
-                    cout << "Номер и серия паспорта: "; cout << currentList->numberAndSeries << endl;
-                    cout << "Тип вклада: "; cout << currentList->contributionType << endl;
-                    cout << "Дата последней операции: "; cout << GetDateString(currentList->dateTimestampLastTransaction) << endl;
-                    cout << "Текущая сумма вклада: "; cout << currentList->amount << endl;
-                    cout << "----------------------------" << endl;
-                }
-                currentList = currentList->next;
+                cout << "Номер аккаунта: "; cout << currentList->number << endl;
+                cout << "ФИО: "; cout << currentList->fio << endl;
+                cout << "Номер и серия паспорта: "; cout << currentList->numberAndSeries << endl;
+                cout << "Тип вклада: "; cout << currentList->contributionType << endl;
+                cout << "Дата последней операции: "; cout << GetDateString(currentList->dateTimestampLastTransaction) << endl;
+                cout << "Текущая сумма вклада: "; cout << currentList->amount << endl;
+                cout << "----------------------------" << endl;
             }
+            currentList = currentList->next;
         }
-        else
-        {
-            cout << "Неверная команда" << endl;
-            return;
-        }
+    }
+    else
+    {
+        cout << "Неверная команда" << endl;
+        return;
+    }
 }
 
 void WriteList()
@@ -495,7 +496,6 @@ void main()
         case 0:
             system("cls");
             DeleteList();
-            system("pause");
             break;
 
         default:

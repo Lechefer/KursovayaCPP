@@ -2,7 +2,7 @@
 .vs/
 Debug/
 KursovayaCPP/Debug/
-.uml
-.uml~
-.png
-.docx
+*.uml
+*.uml~
+*.png
+*.docx
