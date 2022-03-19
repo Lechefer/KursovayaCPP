@@ -9,61 +9,45 @@
 
 using namespace std;
 
-static constexpr int AmountSecondPerYear = 31536000; // 365 days
-static constexpr int AmountSecondPerMonth = 2592000; // 30 day
-static constexpr int AmountSecondPerDay = 86400; // 24 hours
-static constexpr int AmountSecondPerHour = 3600; // 60 minuts
-static constexpr int AmountSecondPerMinute = 60; // 60 seconds
-
-struct Account
+struct Sportsman
 {
-    int number;
-    string fio;
-    string numberAndSeries;
-    string contributionType;
-    int dateTimestampLastTransaction;
-    int amount;
+    string LastName;
+    string Sex;
+    string SportType;
+    int BirthYear;
+    double Height;
 
-    struct Account* next;
+    struct Sportsman* next;
 };
 
-typedef struct Account AccountList;
-AccountList* headList = nullptr;
-AccountList* endList = nullptr;
+typedef struct Sportsman SportsmanList;
+SportsmanList* headList = nullptr;
+SportsmanList* endList = nullptr;
 
-string GetDateString(int dateTimestamp)
+void CopyArrays(SportsmanList* fromList, SportsmanList* inList)
 {
-    std::string dateStr = "";
-    std::string years, months, days, hours, minutes, seconds;
-
-    years = to_string(1970 + dateTimestamp / AmountSecondPerYear);
-    months = to_string(1 + (dateTimestamp % AmountSecondPerYear) / AmountSecondPerMonth);
-    months = months.length() == 1 ? "0" + months : months;
-    days = to_string(1 + ((dateTimestamp % AmountSecondPerYear) % AmountSecondPerMonth) / AmountSecondPerDay);
-    days = days.length() == 1 ? "0" + days : days;
-    hours = to_string((((dateTimestamp % AmountSecondPerYear) % AmountSecondPerMonth) % AmountSecondPerDay) / AmountSecondPerHour);
-    hours = hours.length() == 0 ? "00" + hours : hours;
-    hours = hours.length() == 1 ? "0" + hours : hours;
-    minutes = to_string(((((dateTimestamp % AmountSecondPerYear) % AmountSecondPerMonth) % AmountSecondPerDay) % AmountSecondPerHour) / AmountSecondPerMinute);
-    minutes = minutes.length() == 0 ? "00" + minutes : minutes;
-    minutes = minutes.length() == 1 ? "0" + minutes : minutes;
-    seconds = to_string(((((dateTimestamp % AmountSecondPerYear) % AmountSecondPerMonth) % AmountSecondPerDay) % AmountSecondPerHour) % AmountSecondPerMinute);
-    seconds = seconds.length() == 0 ? "00" + seconds : seconds;
-    seconds = seconds.length() == 1 ? "0" + seconds : seconds;
-
-    std::string res = years + "/" + months + "/" + days + "-" + hours + ":" + minutes + ":" + seconds;
-
-    return res;
+    inList->LastName = fromList->LastName;
+    inList->Sex = fromList->Sex;
+    inList->SportType = fromList->SportType;
+    inList->BirthYear = fromList->BirthYear;
+    inList->Height = fromList->Height;
 }
 
-void CopyArrays(AccountList* fromList, AccountList* inList)
+bool TryParse(string str, double& out)
 {
-    inList->number = fromList->number;
-    inList->fio = fromList->fio;
-    inList->numberAndSeries = fromList->numberAndSeries;
-    inList->contributionType = fromList->contributionType;
-    inList->dateTimestampLastTransaction = fromList->dateTimestampLastTransaction;
-    inList->amount = fromList->amount;
+    bool res = false;
+    try
+    {
+        double resNum = std::atof(str.c_str());
+        out = resNum;
+        res = true;
+    }
+    catch (const exception&)
+    {
+        res = false;
+    }
+
+    return res;
 }
 
 bool TryParse(string str, int& out)
@@ -83,62 +67,37 @@ bool TryParse(string str, int& out)
     return res;
 }
 
-void TryParseDate(string str, int& out)
-{
-    int years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0;
-    std::string date = str.substr(0, str.find_first_of('-'));
-    std::string time = str.substr(str.find_first_of('-') + 1, str.length() - str.find_first_of('-') - 1);
-
-    if (!TryParse(date.substr(0, date.find_first_of('/')), days)) { out = 0; return; }
-    if (!TryParse(date.substr(date.find_first_of('/') + 1, date.find_last_of('/') - date.find_first_of('/') - 1), months)) { out = 0; return; }
-    if (!TryParse(date.substr(date.find_last_of('/') + 1, date.length() - date.find_last_of('/') - 1), years)) { out = 0; return; }
-
-    if (!TryParse(time.substr(0, time.find_first_of(':')), hours)) { out = 0; return; }
-    if (!TryParse(time.substr(time.find_first_of(':') + 1, time.find_last_of(':') - time.find_first_of(':') - 1), minutes)) { out = 0; return; }
-    if (!TryParse(time.substr(time.find_last_of(':') + 1, time.length() - time.find_last_of(':') - 1), seconds)) { out = 0; return; }
-
-    int res = (((((years - 1970) * 365) + ((months - 1) * 31) + (days - 1)) * 24 + hours) * 60 + minutes) * 60 + seconds;
-    
-    out = res > 0 ? res : 0;
-}
-
 void Add()
 {
-    AccountList* currentList = new AccountList;
+    SportsmanList* currentList = new SportsmanList;
     string tempStr; 
     int countTransaction;
 
-    cout << "Введите номер счёта: ";
-    cin >> currentList->number;
+    cout << "Введите фамилию: ";
+    getline(cin, tempStr);
+    currentList->LastName = tempStr;
+    cout << endl;
+
+    cout << "Введите пол: ";
+    getline(cin, tempStr);
+    currentList->Sex = tempStr;
+    cout << endl;
+
+    cout << "Введите вид спорта: ";
+    getline(cin, tempStr);
+    currentList->SportType = tempStr;
+    cout << endl;
+
+    cout << "Введите год рождения: ";
+    cin >> currentList->BirthYear;
+    cout << endl;
+    cin.ignore(32767, '\n');
+
+    cout << "Введите рост: ";
+    cin >> currentList->Height;
     cout << endl;
 
     cin.ignore(32767, '\n');
-
-    cout << "Введите номер и серию пасспорта (1234 123456): ";
-    getline(cin, tempStr);
-    currentList->numberAndSeries = tempStr;
-    cout << endl;
-
-    cout << "Введите ФИО пасспорта (Иванов И.И.): ";
-    getline(cin, tempStr);
-    currentList->fio = tempStr;
-    cout << endl;
-
-    cout << "Введите нужный тип вклада (По требованию; Сберегательный; Накопительный): ";
-    getline(cin, tempStr);
-    currentList->contributionType = tempStr;
-    cout << endl;
-
-    cout << "Введите сумму вклада: ";
-    cin >> currentList->amount;
-    cout << endl;
-
-    cin.ignore(32767, '\n');
-
-    cout << "Введите дату последней операции (15/01/2021-17:13:43): ";
-    getline(cin, tempStr);
-    TryParseDate(tempStr, currentList->dateTimestampLastTransaction);
-
 
     currentList->next = nullptr;
     if (!headList)
@@ -171,27 +130,26 @@ void Search()
         cout << "Список пустой" << endl;
         return;
     }
-    AccountList* currentList = headList;
+    SportsmanList* currentList = headList;
     string tempStr;
     int searchBy, tempInt;
-    cout << "1. Поиск по номеру вклада" << endl;
-    cout << "2. Поиск по паспортным данным" << endl;
+    cout << "1. Поиск по возрасту (моложе)" << endl;
+    cout << "2. Поиск по виду спорта" << endl;
     cin >> searchBy;
     cin.ignore(32767, '\n');
     if (searchBy == 1)
     {
-        cout << "Введите номер вклада: ";
+        cout << "Введите год (включительно): ";
         cin >> tempInt;
         while (currentList)
         {
-            if (currentList->number == tempInt)
+            if (currentList->BirthYear <= tempInt)
             {
-                cout << "Номер аккаунта: "; cout << currentList->number << endl;
-                cout << "ФИО: "; cout << currentList->fio << endl;
-                cout << "Номер и серия паспорта: "; cout << currentList->numberAndSeries << endl;
-                cout << "Тип вклада: "; cout << currentList->contributionType << endl;
-                cout << "Дата последней операции: "; cout << GetDateString(currentList->dateTimestampLastTransaction) << endl;
-                cout << "Текущая сумма вклада: "; cout << currentList->amount << endl;
+                cout << "Фамилия: "; cout << currentList->LastName << endl;
+                cout << "Пол: "; cout << currentList->Sex << endl;
+                cout << "Вид спорта: "; cout << currentList->SportType << endl;
+                cout << "Год рождения: "; cout << currentList->BirthYear << endl;
+                cout << "Рост: "; cout << currentList->Height << endl;
                 cout << "----------------------------" << endl;
             }
             currentList = currentList->next;
@@ -199,18 +157,17 @@ void Search()
     }
     else if (searchBy == 2)
     {
-        cout << "Введите ФИО (Иванов И.И.): ";
+        cout << "Введите вид спорта: ";
         getline(cin, tempStr);
         while (currentList)
         {
-            if (currentList->fio == tempStr)
+            if (currentList->SportType == tempStr)
             {
-                cout << "Номер аккаунта: "; cout << currentList->number << endl;
-                cout << "ФИО: "; cout << currentList->fio << endl;
-                cout << "Номер и серия паспорта: "; cout << currentList->numberAndSeries << endl;
-                cout << "Тип вклада: "; cout << currentList->contributionType << endl;
-                cout << "Дата последней операции: "; cout << GetDateString(currentList->dateTimestampLastTransaction) << endl;
-                cout << "Текущая сумма вклада: "; cout << currentList->amount << endl;
+                cout << "Фамилия: "; cout << currentList->LastName << endl;
+                cout << "Пол: "; cout << currentList->Sex << endl;
+                cout << "Вид спорта: "; cout << currentList->SportType << endl;
+                cout << "Год рождения: "; cout << currentList->BirthYear << endl;
+                cout << "Рост: "; cout << currentList->Height << endl;
                 cout << "----------------------------" << endl;
             }
             currentList = currentList->next;
@@ -231,33 +188,32 @@ void WriteList()
 
         return;
     }
-    AccountList* currentList = headList;
-    cout << "Список аккаунтов:\n";
+    SportsmanList* currentList = headList;
+    cout << "Список спортсменов:\n";
     while (currentList)
     {
-        cout << "Номер аккаунта: "; cout << currentList->number << endl;
-        cout << "ФИО: "; cout << currentList->fio << endl;
-        cout << "Номер и серия паспорта: "; cout << currentList->numberAndSeries << endl;
-        cout << "Тип вклада: "; cout << currentList->contributionType << endl;
-        cout << "Дата последней операции: "; cout << GetDateString(currentList->dateTimestampLastTransaction) << endl;
-        cout << "Текущая сумма вклада: "; cout << currentList->amount << endl;
+        cout << "Фамилия: "; cout << currentList->LastName << endl;
+        cout << "Пол: "; cout << currentList->Sex << endl;
+        cout << "Вид спорта: "; cout << currentList->SportType << endl;
+        cout << "Год рождения: "; cout << currentList->BirthYear << endl;
+        cout << "Рост: "; cout << currentList->Height << endl;
         cout << "----------------------------" << endl;
         currentList = currentList->next;
     }
 }
 
-AccountList* SubListCreate()
+SportsmanList* SubListCreate(string sportType)
 {
-    AccountList* currentList = headList;
-    AccountList* subList = new AccountList;
-    AccountList* headSubList = subList;
+    SportsmanList* currentList = headList;
+    SportsmanList* subList = new SportsmanList;
+    SportsmanList* headSubList = subList;
 
     bool first = true;
     int currentTimestamp = time(0);
 
     while (currentList)
     {
-        if ((currentList->dateTimestampLastTransaction + AmountSecondPerYear >= currentTimestamp) && (currentList->dateTimestampLastTransaction <= currentTimestamp))
+        if (currentList->SportType == sportType)
         {
             if (first)
             {
@@ -267,7 +223,7 @@ AccountList* SubListCreate()
             }
             else
             {
-                subList->next = new AccountList();
+                subList->next = new SportsmanList();
                 subList = subList->next;
                 CopyArrays(currentList, subList);
                 subList->next = nullptr;
@@ -286,7 +242,7 @@ AccountList* SubListCreate()
     }
 }
 
-void WriteListOfLastYear()
+void WriteListBySportType()
 {
     if (!headList)
     {
@@ -294,25 +250,28 @@ void WriteListOfLastYear()
         return;
     }
 
-    AccountList* subList = SubListCreate();
-    AccountList* subHead = subList;
+    string tempStr;
+    cout << "Введите вид спорта: ";
+    getline(cin, tempStr);
 
+    SportsmanList* subList = SubListCreate(tempStr);
+    SportsmanList* subHead = subList;
+    
     if (!subList)
     {
-        cout << "За последний год не было операций ни на одном аккаунте" << endl;
+        cout << "Не найдено ни одного спортсмена по этому виду спорта" << endl;
         return;
     }
 
-    AccountList* elem;
+    SportsmanList* elem;
 
     while (subList)
     {
-        cout << "Номер аккаунта: "; cout << subList->number << endl;
-        cout << "ФИО: "; cout << subList->fio << endl;
-        cout << "Номер и серия паспорта: "; cout << subList->numberAndSeries << endl;
-        cout << "Тип вклада: "; cout << subList->contributionType << endl;
-        cout << "Дата последней операции: "; cout << GetDateString(subList->dateTimestampLastTransaction) << endl;
-        cout << "Текущая сумма вклада: "; cout << subList->amount << endl;
+        cout << "Фамилия: "; cout << subList->LastName << endl;
+        cout << "Пол: "; cout << subList->Sex << endl;
+        cout << "Вид спорта: "; cout << subList->SportType << endl;
+        cout << "Год рождения: "; cout << subList->BirthYear << endl;
+        cout << "Рост: "; cout << subList->Height << endl;
         cout << "----------------------------" << endl;
 
         subList = subList->next;
@@ -320,7 +279,7 @@ void WriteListOfLastYear()
 
     while (subHead)
     {
-        AccountList* currentList = subHead;
+        SportsmanList* currentList = subHead;
         subHead = currentList->next;
         delete currentList;
     }
@@ -336,7 +295,7 @@ void DeleteList()
     }
     while (headList)
     {
-        AccountList* currentList = headList;
+        SportsmanList* currentList = headList;
         headList = currentList->next;
         delete currentList;
     }
@@ -352,15 +311,14 @@ void SaveList()
     }
 
     ofstream fileOut("list.txt");
-    AccountList* currentList = headList;
+    SportsmanList* currentList = headList;
     while (currentList)
     {
-        fileOut << currentList->number << ";";
-        fileOut << currentList->fio << ";";
-        fileOut << currentList->numberAndSeries << ";";
-        fileOut << currentList->contributionType << ";";
-        fileOut << currentList->dateTimestampLastTransaction << ";";
-        fileOut << currentList->amount << ";" << endl;
+        fileOut << currentList->LastName << ";";
+        fileOut << currentList->Sex << ";";
+        fileOut << currentList->SportType << ";";
+        fileOut << currentList->BirthYear << ";";
+        fileOut << currentList->Height << ";" << endl;
 
         currentList = currentList->next;
     }
@@ -380,36 +338,33 @@ void ReadList()
     string str;
     while (getline(fileIn, str))
     {
-        AccountList* currentList = new AccountList;
+        SportsmanList* currentList = new SportsmanList;
 
-        string fio, numberAndSeries, contributionType;
-        int number, dateTimestampLastTransaction, amount;
+        string lastName, sex, sportType;
+        int birthYear;
+        double height;
 
-        TryParse(str.substr(0, str.find_first_of(';')), number);
+        lastName = str.substr(0, str.find_first_of(';'));
         str.erase(0, str.find_first_of(';') + 1);
 
-        fio = str.substr(0, str.find_first_of(';'));
+        sex = str.substr(0, str.find_first_of(';'));
         str.erase(0, str.find_first_of(';') + 1);
 
-        numberAndSeries = str.substr(0, str.find_first_of(';'));
+        sportType = str.substr(0, str.find_first_of(';'));
         str.erase(0, str.find_first_of(';') + 1);
 
-        contributionType = str.substr(0, str.find_first_of(';'));
+        TryParse(str.substr(0, str.find_first_of(';')), birthYear);
+        str.erase(0, str.find_first_of(';') + 1);     
+
+        TryParse(str.substr(0, str.find_first_of(';')), height);
         str.erase(0, str.find_first_of(';') + 1);
 
-        TryParse(str.substr(0, str.find_first_of(';')), dateTimestampLastTransaction);
-        str.erase(0, str.find_first_of(';') + 1);
-
-        TryParse(str.substr(0, str.find_first_of(';')), amount);
-        str.erase(0, str.find_first_of(';') + 1);
-
-        currentList->number = number;
-        currentList->fio = fio;
-        currentList->numberAndSeries = numberAndSeries;
-        currentList->contributionType = contributionType;
-        currentList->dateTimestampLastTransaction = dateTimestampLastTransaction;
-        currentList->amount = amount;
-
+        currentList->LastName = lastName;
+        currentList->Sex = sex;
+        currentList->SportType = sportType;
+        currentList->BirthYear = birthYear;
+        currentList->Height = height;
+        
         currentList->next = NULL;
 
         if (!headList)
@@ -439,10 +394,11 @@ void main()
         cout << "4. Добавить записи" << endl;
         cout << "5. Вывести всё" << endl;
         cout << "6. Удалить всё" << endl;
-        cout << "7. Вывести записи за последний год" << endl;
+        cout << "7. Вывести записи по виду спорта" << endl;
         cout << "0. Выход" << endl;
         cout << "\nВведите номер команды: ";
         cin >> command;
+        cin.ignore(32767, '\n');
         switch (command)
         {
         case 1:
@@ -488,8 +444,8 @@ void main()
             break;
         case 7:
             system("cls");
-            cout << "7. Вывести записи за последний год\n" << endl;
-            WriteListOfLastYear();
+            cout << "7. Вывести записи по виду спорта\n" << endl;
+            WriteListBySportType();
             system("pause");
             break;
 
